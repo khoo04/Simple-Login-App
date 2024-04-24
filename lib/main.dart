@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:simple_login_app2/page/homepage.dart';
-import 'package:simple_login_app2/page/loginpage.dart';
+import 'package:simple_login_app/page/loginpage.dart';
 
 void main() {
-  runApp(const MyApp(home: LoginPage(),));
+  runApp(const MyApp(
+    home: LoginPage(),
+  ));
 }
 
 class MyApp extends StatelessWidget {
@@ -13,15 +14,12 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Simple Login App',
-      debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-        useMaterial3: true,
-      ),
-      home: home
-    );
+        title: 'Simple Login App',
+        debugShowCheckedModeBanner: false,
+        theme: ThemeData(
+          colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+          useMaterial3: true,
+        ),
+        home: home);
   }
 }
-
