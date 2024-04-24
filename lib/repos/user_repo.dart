@@ -29,7 +29,7 @@ Future<int> loginWithApi(String username, String password) async {
     final requestBody =
         json.encode({'username': username, 'password': password});
     request.write(requestBody);
-    print(request);
+
     final response = await request.close();
     if (response.statusCode == HttpStatus.ok) {
       return int.parse(await response.transform(utf8.decoder).join());
@@ -82,4 +82,17 @@ Future<int> checkSavedUserData() async {
   } else {
     return 1;
   }
+}
+
+Future<User> checkSavedUser() async {
+  final prefs = await SharedPreferences.getInstance();
+  final userInPrefs = prefs.getString('user');
+
+  if (userInPrefs == null) {
+    return User.nullUser();
+  }
+  final userJson = json.decode(userInPrefs);
+
+  final user = User.fromJson(userJson);
+  return user;
 }

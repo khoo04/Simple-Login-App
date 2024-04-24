@@ -3,6 +3,8 @@ import 'package:simple_login_app/page/homepage.dart';
 import 'package:simple_login_app/repos/user_repo.dart';
 import 'package:simple_login_app/widget/logintext.dart';
 
+import '../models/user.dart';
+
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
 
@@ -13,6 +15,7 @@ class LoginPage extends StatefulWidget {
 class _LoginPageState extends State<LoginPage> {
   final _usernameController = TextEditingController();
   final _passwordController = TextEditingController();
+  late User userNow;
 
   @override
   void initState() {
@@ -22,10 +25,11 @@ class _LoginPageState extends State<LoginPage> {
 
   void checkUser() async {
     int userExist = await checkSavedUserData();
-
+    User userNow = await checkSavedUser();
     if (userExist == 1) {
       Navigator.of(context).push(MaterialPageRoute(
-        builder: (context) => MyHomePage(title: "Hello AWord"),
+        builder: (context) => MyHomePage(
+            title: "Hello ${userNow.username} , ${userNow.password}"),
       ));
     }
   }
@@ -57,7 +61,6 @@ class _LoginPageState extends State<LoginPage> {
             ),
             ElevatedButton(
                 onPressed: () async {
-                  getUserList();
                   // if (_usernameController.text == "zhenxian" &&
                   //     _passwordController.text == "abc123") {
                   //   Navigator.of(context).push(
@@ -66,8 +69,8 @@ class _LoginPageState extends State<LoginPage> {
                   //     ),
                   //   );
                   // }
-                  // final result = await login(
-                  //     _usernameController.text, _passwordController.text);
+                  userNow = await login(
+                      _usernameController.text, _passwordController.text);
 
                   //Login With Api
                   // final result = await loginWithApi(
@@ -81,14 +84,16 @@ class _LoginPageState extends State<LoginPage> {
                   //       .showSnackBar(SnackBar(content: Text("Invalid User")));
                   // }
 
-                  // if (result.username != "" && result.password != "") {
-                  //   Navigator.of(context).push(MaterialPageRoute(
-                  //     builder: (context) => MyHomePage(title: "Hello AWord"),
-                  //   ));
-                  // } else {
-                  //   ScaffoldMessenger.of(context)
-                  //       .showSnackBar(SnackBar(content: Text("Invalid User")));
-                  // }
+                  if (userNow.username != "" && userNow.password != "") {
+                    Navigator.of(context).push(MaterialPageRoute(
+                      builder: (context) => MyHomePage(
+                          title:
+                              "Hello ${userNow.username} , ${userNow.password}"),
+                    ));
+                  } else {
+                    ScaffoldMessenger.of(context)
+                        .showSnackBar(SnackBar(content: Text("Invalid User")));
+                  }
                 },
                 child: Text('Login'))
           ],
