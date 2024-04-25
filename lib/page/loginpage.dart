@@ -20,17 +20,23 @@ class _LoginPageState extends State<LoginPage> {
   @override
   void initState() {
     super.initState();
-    checkUser();
+    autoLogin();
   }
 
-  void checkUser() async {
-    int userExist = await checkSavedUserData();
-    User userNow = await checkSavedUser();
-    if (userExist == 1) {
-      Navigator.of(context).push(MaterialPageRoute(
-        builder: (context) => MyHomePage(
-            title: "Hello ${userNow.username} , ${userNow.password}"),
-      ));
+  void autoLogin() async {
+    User user = await checkSavedUser();
+    print(user.password);
+    if (!isNullUser(user)) {
+      final result = await loginWithApi(user.username, user.password);
+      if (result != 0) {
+        Navigator.of(context).push(MaterialPageRoute(
+          builder: (context) =>
+              MyHomePage(title: "Hello AWord ${user.username} "),
+        ));
+      } else {
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text("Invalid User")));
+      }
     }
   }
 
@@ -69,31 +75,32 @@ class _LoginPageState extends State<LoginPage> {
                   //     ),
                   //   );
                   // }
-                  userNow = await login(
-                      _usernameController.text, _passwordController.text);
+
+                  // userNow = await login(
+                  //     _usernameController.text, _passwordController.text);
 
                   //Login With Api
-                  // final result = await loginWithApi(
-                  //     _usernameController.text, _passwordController.text);
-                  // if (result != 0) {
-                  //   Navigator.of(context).push(MaterialPageRoute(
-                  //     builder: (context) => MyHomePage(title: "Hello AWord"),
-                  //   ));
-                  // } else {
-                  //   ScaffoldMessenger.of(context)
-                  //       .showSnackBar(SnackBar(content: Text("Invalid User")));
-                  // }
-
-                  if (userNow.username != "" && userNow.password != "") {
+                  final result = await loginWithApi(
+                      _usernameController.text, _passwordController.text);
+                  if (result != 0) {
                     Navigator.of(context).push(MaterialPageRoute(
-                      builder: (context) => MyHomePage(
-                          title:
-                              "Hello ${userNow.username} , ${userNow.password}"),
+                      builder: (context) => MyHomePage(title: "Hello AWord"),
                     ));
                   } else {
                     ScaffoldMessenger.of(context)
                         .showSnackBar(SnackBar(content: Text("Invalid User")));
                   }
+
+                  // if (userNow.username != "" && userNow.password != "") {
+                  //   Navigator.of(context).push(MaterialPageRoute(
+                  //     builder: (context) => MyHomePage(
+                  //         title:
+                  //             "Hello ${userNow.username} , ${userNow.password}"),
+                  //   ));
+                  // } else {
+                  //   ScaffoldMessenger.of(context)
+                  //       .showSnackBar(SnackBar(content: Text("Invalid User")));
+                  // }
                 },
                 child: Text('Login'))
           ],

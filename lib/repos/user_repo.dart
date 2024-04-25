@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:developer';
 import 'dart:io';
 
 import 'package:flutter/services.dart';
@@ -20,6 +21,25 @@ Future<List> getUserList() async {
   return users;
 }
 
+Future<List<String>> getUserName() async {
+  try {
+    final getNameUrl = "${url}User/getNames";
+    final request = await HttpClient().getUrl(Uri.parse(getNameUrl));
+    final response = await request.close();
+    if (response.statusCode == HttpStatus.ok) {
+      String responseBody = await response.transform(utf8.decoder).join();
+      List<dynamic> parsedList = json.decode(responseBody) as List<dynamic>;
+      List<String> users =
+          parsedList.map((element) => element.toString()).toList();
+      return users;
+    } else {
+      return [];
+    }
+  } catch (ex) {
+    return [];
+  }
+}
+
 Future<int> loginWithApi(String username, String password) async {
   try {
     final login_url = url + "User/login";
@@ -32,6 +52,7 @@ Future<int> loginWithApi(String username, String password) async {
 
     final response = await request.close();
     if (response.statusCode == HttpStatus.ok) {
+      saveUserData(User(username: username, password: password));
       return int.parse(await response.transform(utf8.decoder).join());
     } else {
       return 0;
