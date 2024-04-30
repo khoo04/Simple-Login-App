@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:simple_login_app/page/drawerviewpage.dart';
 import 'package:simple_login_app/page/loginpage.dart';
+import 'package:simple_login_app/page/tabviewpage.dart';
 
 void main() {
   runApp(const MyApp(
-    home: LoginPage(),
+    home: DrawerViewPage(),
   ));
 }
 
