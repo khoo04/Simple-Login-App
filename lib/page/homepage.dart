@@ -1,90 +1,170 @@
-
 import 'package:flutter/material.dart';
+import 'package:simple_login_app/repos/role_repo.dart';
+import 'package:simple_login_app/repos/user_repo.dart';
+import 'package:simple_login_app/widget/user_tile.dart';
 
 class MyHomePage extends StatefulWidget {
-  const MyHomePage({super.key, required this.title});
-
-  // This widget is the home page of your application. It is stateful, meaning
-  // that it has a State object (defined below) that contains fields that affect
-  // how it looks.
-
-  // This class is the configuration for the state. It holds the values (in this
-  // case the title) provided by the parent (in this case the App widget) and
-  // used by the build method of the State. Fields in a Widget subclass are
-  // always marked "final".
+  const MyHomePage(
+      {Key? key, required this.currentUsername, required this.title})
+      : super(key: key);
 
   final String title;
-
+  final String currentUsername;
   @override
   State<MyHomePage> createState() => _MyHomePageState();
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
+  List? userList = [];
+  List? filteredUserList = [];
+  List<dynamic> roleItem = [];
+  String role = "";
+  String dropdownValue = "";
+  @override
+  void initState() {
+    super.initState();
+    _getUserRoles();
+    _getRolesItem();
+  }
 
-  void _incrementCounter() {
+  void _getUserList() async {
+    userList = await getUserList();
+    if (userList == null) {
+      filteredUserList = null;
+    } else {
+      filteredUserList = List.from(userList!);
+    }
     setState(() {
-      // This call to setState tells the Flutter framework that something has
-      // changed in this State, which causes it to rerun the build method below
-      // so that the display can reflect the updated values. If we changed
-      // _counter without calling setState(), then the build method would not be
-      // called again, and so nothing would appear to happen.
-      _counter++;
+      dropdownValue = "0";
     });
+  }
+
+  void _getUserRoles() async {
+    role = await getUserRoles(widget.currentUsername);
+    setState(() {});
+  }
+
+  void _getRolesItem() async {
+    roleItem = await getRoles();
+    roleItem.insert(0, {"id": 0, "role": "All"});
+    dropdownValue = roleItem.first["id"].toString();
+    setState(() {});
+  }
+
+  Widget _buildUserList(List<dynamic>? listData) {
+    if (listData != null) {
+      return ListView.separated(
+        separatorBuilder: (context, index) => const SizedBox(
+          height: 12.0,
+        ),
+        itemBuilder: ((context, index) {
+          Map<String, dynamic> data = listData[index];
+          return UserTile(
+              imagePath: "lib/assets/resources/${data["image"]}",
+              username: data["name"],
+              role: (data["role_id"] == 1) ? "Employee" : "Manager");
+        }),
+        itemCount: listData.length,
+      );
+    } else {
+      return Text("Invalid Role");
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    // This method is rerun every time setState is called, for instance as done
-    // by the _incrementCounter method above.
-    //
-    // The Flutter framework has been optimized to make rerunning build methods
-    // fast, so that you can just rebuild anything that needs updating rather
-    // than having to individually change instances of widgets.
     return Scaffold(
       appBar: AppBar(
-        // TRY THIS: Try changing the color here to a specific color (to
-        // Colors.amber, perhaps?) and trigger a hot reload to see the AppBar
-        // change color while the other colors stay the same.
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        // Here we take the value from the MyHomePage object that was created by
-        // the App.build method, and use it to set our appbar title.
+        backgroundColor: Theme.of(context).colorScheme.secondary,
         title: Text(widget.title),
       ),
-      body: Center(
-        // Center is a layout widget. It takes a single child and positions it
-        // in the middle of the parent.
-        child: Column(
-          // Column is also a layout widget. It takes a list of children and
-          // arranges them vertically. By default, it sizes itself to fit its
-          // children horizontally, and tries to be as tall as its parent.
-          //
-          // Column has various properties to control how it sizes itself and
-          // how it positions its children. Here we use mainAxisAlignment to
-          // center the children vertically; the main axis here is the vertical
-          // axis because Columns are vertical (the cross axis would be
-          // horizontal).
-          //
-          // TRY THIS: Invoke "debug painting" (choose the "Toggle Debug Paint"
-          // action in the IDE, or press "p" in the console), to see the
-          // wireframe for each widget.
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            const Text(
-              'You have pushed the button this many times:',
+      body: Column(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Padding(
+            padding:
+                const EdgeInsets.symmetric(vertical: 5.0, horizontal: 10.0),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      "Hello ${widget.currentUsername}",
+                      style: const TextStyle(
+                        fontSize: 24.0,
+                        fontWeight: FontWeight.bold,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    Text("Role : $role"),
+                  ],
+                ),
+                const SizedBox(
+                  width: 10.0,
+                ),
+                ElevatedButton(
+                  onPressed: _getUserList,
+                  child: const Text("Get User List"),
+                ),
+              ],
             ),
-            Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.headlineMedium,
+          ),
+          if (role == "Manager")
+            Padding(
+              padding:
+                  const EdgeInsets.symmetric(vertical: 5.0, horizontal: 10.0),
+              child: Row(
+                children: [
+                  const Text("Filter"),
+                  const SizedBox(
+                    width: 10,
+                  ),
+                  DropdownButton<String>(
+                    value: dropdownValue,
+                    icon: const Icon(Icons.arrow_downward),
+                    elevation: 16,
+                    style: const TextStyle(color: Colors.deepPurple),
+                    underline: Container(
+                      height: 2,
+                      color: Colors.deepPurpleAccent,
+                    ),
+                    onChanged: (String? value) {
+                      setState(() {
+                        dropdownValue = value!;
+                        if (dropdownValue == 0.toString()) {
+                          filteredUserList = List.from(userList!);
+                        } else {
+                          filteredUserList = userList!
+                              .where((element) =>
+                                  element["role_id"] ==
+                                  int.parse(dropdownValue))
+                              .toList();
+                        }
+                      });
+                    },
+                    items: roleItem.map<DropdownMenuItem<String>>((value) {
+                      return DropdownMenuItem<String>(
+                        value: value["id"].toString(),
+                        child: Text(value["role"].toString()),
+                      );
+                    }).toList(),
+                  ),
+                ],
+              ),
             ),
-          ],
-        ),
+          Expanded(
+            child: Container(
+              padding:
+                  const EdgeInsets.symmetric(vertical: 5.0, horizontal: 10.0),
+              child: _buildUserList(filteredUserList),
+            ),
+          ),
+        ],
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        child: const Icon(Icons.add),
-      ), // This trailing comma makes auto-formatting nicer for build methods.
     );
   }
 }
